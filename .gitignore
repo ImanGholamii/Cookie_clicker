@@ -1,4 +1,6 @@
 .venv/
+.idea/
+.env
 appbrewery_signup.py
 interaction.py
 main.py
