@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from decouple import config
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_experimental_option('detach', True)
@@ -36,10 +35,11 @@ save_code = WebDriverWait(driver, 60).until(
     EC.presence_of_element_located((By.XPATH, '//*[@id="textareaPrompt"]'))
 ).text
 
-# Copy save code to clipboard using pyperclip
+# Copy recovery code to clipboard using pyperclip
 pyperclip.copy(save_code)
 code = pyperclip.paste()
-print(code)
+with open(file='recovery.txt', mode='w') as f:
+    f.write(f"recovery code={code}")
 # Display a message to the user in the browser
 sleep(1)
 done_btn = WebDriverWait(driver, timeout=60).until(
@@ -49,7 +49,11 @@ done_btn.click()
 sleep(1)
 driver.execute_script('alert("Your Save code has been copied to the clipboard and recovery_code.txt!");')
 sleep(3)
-Keys.ENTER
+cookie = WebDriverWait(driver, 30).until(
+    EC.presence_of_element_located((By.ID, 'bigCookie'))
+)
+for i in range(10):
+    cookie.click()
 ## TODO1 write the code in a file
 ## TODO2 find cookie and write codes to click it for 5 minutes or a time
 ## TODO3 remove quit to manage it by user
