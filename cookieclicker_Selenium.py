@@ -49,6 +49,12 @@ done_btn.click()
 sleep(1)
 driver.execute_script('alert("Your Save code has been copied to the clipboard and recovery_code.txt!");')
 sleep(3)
+# Wait for the user to close the alert
+WebDriverWait(driver, 10).until(EC.alert_is_present())
+alert = driver.switch_to.alert
+alert.accept()  # Close the alert
+
+# click on cookie
 cookie = WebDriverWait(driver, 30).until(
     EC.presence_of_element_located((By.ID, 'bigCookie'))
 )
