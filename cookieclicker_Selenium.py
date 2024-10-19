@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 import pyperclip
 from selenium import webdriver
@@ -14,12 +14,12 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get('https://orteil.dashnet.org/cookieclicker/')
 
 
-def accept_cookies():
+def accept_cookies(time: int):
     """Accept the web cookies."""
     try:
         print("Looking for the cookie consent button...")
         # Wait for the cookie consent button to be clickable
-        consent_btn = WebDriverWait(driver, 20).until(
+        consent_btn = WebDriverWait(driver, time).until(
             EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[3]/div[2]/div[1]/div[2]/div[2]/button[1]/p'))
         )
@@ -104,16 +104,48 @@ def save_game():
     option_btn.click()
 
 
+def set_timeout():
+    """Get code execution time(default 1 minute)"""
+    script = '''
+        var input = window.prompt('How many minutes do you want it to work?', '1');
+        navigator.clipboard.writeText(input);
+        return input
+    '''
+    driver.execute_script(script)
+    sleep(5)
+    user_input = pyperclip.paste()  # clipboard content
+    sleep(2)
+    print(f"User input: {user_input}")
+    if user_input is None or user_input.strip() == '':
+        print("No input provided, using default value of 1 minute.")
+        duration_minutes = 1
+        sleep(1)
+    else:
+        try:
+            duration_minutes = int(user_input)
+            sleep(1)
+        except ValueError:
+            print("Invalid input! Using default value of 1 minute.")
+            duration_minutes = 1
+            sleep(1)
+
+    duration_seconds = duration_minutes * 60
+    sleep(1)
+    return duration_seconds
+
+
 def click_on_cookie():
     """Find and click on cookie infinitely, and save process"""
     cookie = WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, 'bigCookie'))
     )
+    start_time = time()
     number = 0
-    while True:
+    timeout = set_timeout()
+    while time() < start_time + timeout:
         cookie.click()
         number += 1
-        if number % 1000 == 0:
+        if number % 600 == 0:
             save_game()
 
 
@@ -125,8 +157,7 @@ def select_lng():
 
 
 def main():
-
-    accept_cookies()
+    accept_cookies(20)
 
     send_alert('alert("Privacy message Must be Close by Yourself!")')
 
@@ -134,9 +165,7 @@ def main():
 
     send_alert('alert("Privacy message Must be Close by Yourself!")')
 
-    accept_cookies()
-
-
+    accept_cookies(5)
 
     try:
         with open(file='recovery.txt', mode='r') as f:
